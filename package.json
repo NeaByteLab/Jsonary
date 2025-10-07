@@ -1,0 +1,90 @@
+{
+  "name": "@neabyte/jsonary",
+  "version": "1.0.0",
+  "description": "A lightweight TypeScript library for file-based JSON database operations with querying capabilities.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "npm run type-check && unbuild --minify",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "format": "prettier --write 'src/**/*.ts'",
+    "clean": "rm -rf dist && rm -rf .tsbuildinfo",
+    "prepublishOnly": "npm run clean && npm run build",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "crud",
+    "data-management",
+    "data-manipulation",
+    "data-persistence",
+    "data-storage",
+    "document-store",
+    "embedded-database",
+    "file-based",
+    "file-database",
+    "filtering",
+    "json",
+    "json-db",
+    "json-storage",
+    "lightweight",
+    "local-storage",
+    "nodejs",
+    "persistence",
+    "query-builder",
+    "query-engine",
+    "schema-less",
+    "search",
+    "sql-like",
+    "typescript",
+    "zero-dependency"
+  ],
+  "author": {
+    "name": "NeaByteLab",
+    "email": "me@neabyte.com",
+    "url": "https://github.com/NeaByteLab"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NeaByteLab/Jsonary.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NeaByteLab/Jsonary/issues"
+  },
+  "homepage": "https://github.com/NeaByteLab/Jsonary#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.37.0",
+    "@types/node": "^24.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-security": "^3.0.1",
+    "eslint-plugin-sonarjs": "^3.0.5",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "unbuild": "^3.6.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
