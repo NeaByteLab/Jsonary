@@ -9,6 +9,7 @@
     "@root/": "./src/",
     "@interfaces/": "./src/interfaces/"
   },
+  "nodeModulesDir": "none",
   "compilerOptions": {
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
