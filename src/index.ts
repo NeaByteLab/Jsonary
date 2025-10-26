@@ -211,3 +211,9 @@ export default class Jsonary {
     }
   }
 }
+
+/**
+ * Exports interfaces for type checking.
+ * @description Provides type definitions for Jsonary operations and conditions.
+ */
+export * from '@interfaces/index'

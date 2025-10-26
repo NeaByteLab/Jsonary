@@ -1,4 +1,5 @@
 import type { JsonaryCondition, JsonaryParent } from '@interfaces/index'
+import { queryOperators, getOperatorsSorted } from '@root/Constant'
 
 /**
  * Query builder for filtering and manipulating JSON data.
@@ -13,28 +14,6 @@ export class QueryBuilder {
   private readonly conditions: JsonaryCondition[] = []
   /** Original data array reference */
   private readonly originalData: Record<string, unknown>[]
-  /** Mapping of operator names to symbols */
-  private readonly parseOperators: {
-    readonly eq: '='
-    readonly neq: '!='
-    readonly gt: '>'
-    readonly lt: '<'
-    readonly gte: '>='
-    readonly lte: '<='
-    readonly contains: 'contains'
-    readonly startsWith: 'startsWith'
-    readonly endsWith: 'endsWith'
-  } = {
-    eq: '=',
-    neq: '!=',
-    gt: '>',
-    lt: '<',
-    gte: '>=',
-    lte: '<=',
-    contains: 'contains',
-    startsWith: 'startsWith',
-    endsWith: 'endsWith'
-  } as const
   /** Current filtered data array */
   private data: Record<string, unknown>[]
 
@@ -102,7 +81,13 @@ export class QueryBuilder {
    */
   update(data: Record<string, unknown>): void {
     this.data.forEach((item: Record<string, unknown>) => {
-      Object.assign(item, data)
+      Object.keys(data).forEach((key: string) => {
+        if (key.includes('.')) {
+          this.setNestedValue(item, key, data[key])
+        } else {
+          item[key] = data[key]
+        }
+      })
     })
     this.parent?.syncFromQueryBuilder(this.originalData)
   }
@@ -140,29 +125,29 @@ export class QueryBuilder {
     const fieldValue: unknown = this.getNestedValue(item, condition.field)
     const op: JsonaryCondition['operator'] = operator
     switch (op) {
-      case this.parseOperators.eq:
+      case queryOperators.eq:
         return fieldValue === value
-      case this.parseOperators.neq:
+      case queryOperators.neq:
         return fieldValue !== value
-      case this.parseOperators.gt:
+      case queryOperators.gt:
         return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue > value
-      case this.parseOperators.lt:
+      case queryOperators.lt:
         return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue < value
-      case this.parseOperators.gte:
+      case queryOperators.gte:
         return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue >= value
-      case this.parseOperators.lte:
+      case queryOperators.lte:
         return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue <= value
-      case this.parseOperators.contains:
+      case queryOperators.contains:
         return (
           typeof fieldValue === 'string' && typeof value === 'string' && fieldValue.includes(value)
         )
-      case this.parseOperators.startsWith:
+      case queryOperators.startsWith:
         return (
           typeof fieldValue === 'string' &&
           typeof value === 'string' &&
           fieldValue.startsWith(value)
         )
-      case this.parseOperators.endsWith:
+      case queryOperators.endsWith:
         return (
           typeof fieldValue === 'string' && typeof value === 'string' && fieldValue.endsWith(value)
         )
@@ -198,6 +183,85 @@ export class QueryBuilder {
   }
 
   /**
+   * Parses a string condition into structured format.
+   * @description Converts string-based conditions into JsonaryCondition objects.
+   * @param condition - String condition to parse
+   * @returns Parsed condition object or null if invalid
+   */
+  private parseCondition(condition: string): JsonaryCondition | null {
+    if (QueryBuilder.conditionRecent.has(condition)) {
+      return QueryBuilder.conditionRecent.get(condition) ?? null
+    }
+    const operators: string[] = getOperatorsSorted()
+    for (const op of operators) {
+      const index: number = condition.indexOf(op)
+      if (index !== -1) {
+        const value: string = condition.substring(index + op.length).trim()
+        const parsedValue: unknown = this.parseSpecialValue(this.stripQuotes(value))
+        const result: JsonaryCondition = {
+          field: condition.substring(0, index).trim(),
+          operator: op as JsonaryCondition['operator'],
+          value: parsedValue
+        }
+        QueryBuilder.conditionRecent.set(condition, result)
+        return result
+      }
+    }
+    QueryBuilder.conditionRecent.set(condition, null)
+    return null
+  }
+
+  /**
+   * Parses special string values to their appropriate types.
+   * @description Converts string representations of special values to their actual types.
+   * @param value - Value to parse
+   * @returns Parsed value in appropriate type
+   */
+  private parseSpecialValue(value: unknown): unknown {
+    switch (value) {
+      case 'true':
+        return true
+      case 'false':
+        return false
+      case 'null':
+        return null
+      case 'undefined':
+        return undefined
+      default:
+        if (!isNaN(Number(value)) && value !== '') {
+          return Number(value)
+        }
+        return value
+    }
+  }
+
+  /**
+   * Sets a nested value in an object using dot notation.
+   * @description Creates nested objects as needed and sets the final value.
+   * @param obj - Object to modify
+   * @param path - Dot-separated path to the property
+   * @param value - Value to set
+   */
+  private setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
+    const keys: string[] = path.split('.')
+    let current: Record<string, unknown> = obj
+    for (let i: number = 0; i < keys.length - 1; i++) {
+      const key: string | undefined = keys[i]
+      if (key === undefined) {
+        continue
+      }
+      if (!(key in current) || typeof current[key] !== 'object' || current[key] === null) {
+        current[key] = {}
+      }
+      current = current[key] as Record<string, unknown>
+    }
+    const lastKey: string | undefined = keys[keys.length - 1]
+    if (lastKey !== undefined) {
+      current[lastKey] = value
+    }
+  }
+
+  /**
    * Strips quotes from string values.
    * @description Removes surrounding single or double quotes from string values.
    * @param value - String value to process
@@ -212,62 +276,5 @@ export class QueryBuilder {
       return value.slice(1, -1)
     }
     return value
-  }
-
-  /**
-   * Parses special string values to their appropriate types.
-   * @description Converts string representations of special values to their actual types.
-   * @param value - Value to parse
-   * @returns Parsed value in appropriate type
-   */
-  private parseSpecialValue(value: unknown): unknown {
-    if (value === 'true') {
-      return true
-    }
-    if (value === 'false') {
-      return false
-    }
-    if (value === 'null') {
-      return null
-    }
-    if (value === 'undefined') {
-      return undefined
-    }
-    if (!isNaN(Number(value)) && value !== '') {
-      return Number(value)
-    }
-    return value
-  }
-
-  /**
-   * Parses a string condition into structured format.
-   * @description Converts string-based conditions into JsonaryCondition objects.
-   * @param condition - String condition to parse
-   * @returns Parsed condition object or null if invalid
-   */
-  private parseCondition(condition: string): JsonaryCondition | null {
-    if (QueryBuilder.conditionRecent.has(condition)) {
-      return QueryBuilder.conditionRecent.get(condition) ?? null
-    }
-    const operators: string[] = Object.values(this.parseOperators).sort(
-      (a: string, b: string) => b.length - a.length
-    )
-    for (const op of operators) {
-      const index: number = condition.indexOf(op)
-      if (index !== -1) {
-        const value: string = condition.substring(index + op.length).trim()
-        const parsedValue: unknown = this.parseSpecialValue(this.stripQuotes(value))
-
-        const result: JsonaryCondition = {
-          field: condition.substring(0, index).trim(),
-          operator: op as JsonaryCondition['operator'],
-          value: parsedValue
-        }
-        QueryBuilder.conditionRecent.set(condition, result)
-        return result
-      }
-    }
-    QueryBuilder.conditionRecent.set(condition, null)
-    return null
   }
 }

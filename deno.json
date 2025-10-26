@@ -1,0 +1,15 @@
+{
+  "name": "@neabyte/jsonary",
+  "description": "A lightweight TypeScript library for file-based JSON database operations with querying capabilities.",
+  "version": "1.0.1",
+  "type": "module",
+  "license": "MIT",
+  "exports": "./src/index.ts",
+  "imports": {
+    "@root/": "./src/",
+    "@interfaces/": "./src/interfaces/"
+  },
+  "publish": {
+    "exclude": ["dist/", "node_modules/", "package*.json", "tsconfig.json", "eslint.config.js", "build.config.ts", ".github/", ".prettierignore", ".prettierrc"]
+  }
+}

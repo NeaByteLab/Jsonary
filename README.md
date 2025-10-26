@@ -1,11 +1,15 @@
-# Jsonary [![](https://img.shields.io/npm/v/@neabyte/jsonary.svg)](https://www.npmjs.org/package/@neabyte/jsonary) [![Node.js CI](https://github.com/NeaByteLab/Jsonary/actions/workflows/ci.yaml/badge.svg)](https://github.com/NeaByteLab/Jsonary/actions/workflows/ci.yaml)
+# Jsonary [![](https://img.shields.io/npm/v/@neabyte/jsonary.svg)](https://www.npmjs.org/package/@neabyte/jsonary) [![JSR](https://jsr.io/badges/@neabyte/jsonary)](https://jsr.io/@neabyte/jsonary) [![Node.js CI](https://github.com/NeaByteLab/Jsonary/actions/workflows/ci.yaml/badge.svg)](https://github.com/NeaByteLab/Jsonary/actions/workflows/ci.yaml)
 
 A lightweight TypeScript library for file-based JSON database operations with querying capabilities.
 
 ## 📦 Installation
 
 ```bash
+# npm
 npm install @neabyte/jsonary
+
+# deno
+deno add jsr:@neabyte/jsonary
 ```
 
 ## 🔧 Module Support
