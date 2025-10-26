@@ -1,5 +1,5 @@
-import type { JsonaryCondition, JsonaryOptions } from '@interfaces/index'
-import { QueryBuilder } from '@root/Query'
+import type { JsonaryCondition, JsonaryOptions } from '@interfaces/index.ts'
+import { QueryBuilder } from '@root/Query.ts'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -216,4 +216,4 @@ export default class Jsonary {
  * Exports interfaces for type checking.
  * @description Provides type definitions for Jsonary operations and conditions.
  */
-export * from '@interfaces/index'
+export * from '@interfaces/index.ts'

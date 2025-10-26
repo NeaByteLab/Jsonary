@@ -1,4 +1,4 @@
-import type { QueryOperatorsType } from '@interfaces/index'
+import type { QueryOperatorsType } from '@interfaces/index.ts'
 
 /**
  * Query operator constants.

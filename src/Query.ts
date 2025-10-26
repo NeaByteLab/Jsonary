@@ -1,5 +1,5 @@
-import type { JsonaryCondition, JsonaryParent } from '@interfaces/index'
-import { queryOperators, getOperatorsSorted } from '@root/Constant'
+import type { JsonaryCondition, JsonaryParent } from '@interfaces/index.ts'
+import { queryOperators, getOperatorsSorted } from '@root/Constant.ts'
 
 /**
  * Query builder for filtering and manipulating JSON data.

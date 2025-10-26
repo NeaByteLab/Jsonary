@@ -13,6 +13,7 @@
     },
     "tsBuildInfoFile": ".tsbuildinfo",
     "importsNotUsedAsValues": "remove",
+    "allowImportingTsExtensions": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

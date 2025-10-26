@@ -9,6 +9,30 @@
     "@root/": "./src/",
     "@interfaces/": "./src/interfaces/"
   },
+  "compilerOptions": {
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "checkJs": false,
+    "exactOptionalPropertyTypes": true,
+    "jsx": "react",
+    "lib": ["deno.ns", "deno.window"],
+    "noErrorTruncation": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "useUnknownInCatchVariables": true
+  },
   "publish": {
     "exclude": ["dist/", "node_modules/", "package*.json", "tsconfig.json", "eslint.config.js", "build.config.ts", ".github/", ".prettierignore", ".prettierrc"]
   }
