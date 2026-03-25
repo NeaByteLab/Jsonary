@@ -17,5 +17,4 @@ node_modules/
 package-lock.json
 
 # Local data files
-*.json
 data.json
