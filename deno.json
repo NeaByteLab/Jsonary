@@ -48,7 +48,7 @@
     "useTabs": false
   },
   "lint": {
-    "include": ["src/"],
+    "include": ["src/", "tests/"],
     "rules": {
       "tags": ["fresh", "jsr", "jsx", "react", "recommended", "workspace"],
       "exclude": ["no-console", "no-external-import", "prefer-ascii", "prefer-primordials"]
@@ -56,13 +56,18 @@
   },
   "lock": true,
   "nodeModulesDir": "auto",
+  "test": {
+    "include": ["tests/**/*.ts"],
+    "exclude": ["tests/**/*.d.ts"]
+  },
   "tasks": {
-    "check": "deno fmt src/ && deno lint src/ && deno check src/"
+    "check": "deno fmt src/ && deno lint src/ && deno check src/",
+    "test": "deno fmt tests/ && deno lint tests/ && deno test --allow-read --allow-write --allow-env"
   },
   "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.19",
     "@neabyte/jsonary": "./src/index.ts",
-    "@root/": "./src/",
-    "@interfaces/": "./src/interfaces/"
+    "@app/": "./src/"
   },
   "publish": {
     "include": ["src/", "README.md", "LICENSE", "USAGE.md", "deno.json"]

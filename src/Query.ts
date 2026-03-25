@@ -1,86 +1,87 @@
-import type { JsonaryCondition, JsonaryParent } from '@interfaces/index.ts'
-import { getOperatorsSorted, queryOperators } from '@root/Constant.ts'
+import type * as Types from '@app/Types.ts'
+import { getOperatorsSorted, queryOperators } from '@app/Constant.ts'
 
 /**
- * Query builder for filtering and manipulating JSON data.
- * @description Provides fluent interface for building complex queries with chaining operations.
+ * Query builder for records
+ * @description Fluent chaining for filters, updates, deletes.
  */
 export class QueryBuilder {
   /** Cache for recently parsed conditions to improve performance */
-  private static readonly conditionRecent: Map<string, JsonaryCondition | null> = new Map()
+  private static readonly recentConditionCache: Map<string, Types.JsonaryCondition | null> =
+    new Map()
   /** Parent instance for synchronization */
-  private readonly parent: JsonaryParent | undefined
+  private readonly parentDb: Types.JsonaryParent | undefined
   /** Array of applied conditions */
-  private readonly conditions: JsonaryCondition[] = []
+  private readonly conditions: Types.JsonaryCondition[] = []
   /** Original data array reference */
-  private readonly originalData: Record<string, unknown>[]
+  private readonly originalRecords: Record<string, unknown>[]
   /** Current filtered data array */
-  private data: Record<string, unknown>[]
+  private records: Record<string, unknown>[]
 
   /**
-   * Creates a new QueryBuilder instance.
-   * @description Initializes the query builder with data and optional parent reference.
+   * Create QueryBuilder instance
+   * @description Stores records and optional parent sync.
    * @param data - Array of data records to query
    * @param parent - Optional parent instance for synchronization
    */
-  constructor(data: Record<string, unknown>[], parent?: JsonaryParent) {
-    this.originalData = data
-    this.data = [...data]
-    this.parent = parent
+  constructor(data: Record<string, unknown>[], parent?: Types.JsonaryParent) {
+    this.originalRecords = data
+    this.records = [...data]
+    this.parentDb = parent
   }
 
   /**
-   * Gets the count of filtered records.
-   * @description Returns the number of records matching current filter conditions.
+   * Count filtered records
+   * @description Returns records matching current conditions.
    * @returns Number of matching records
    */
   count(): number {
-    return this.data.length
+    return this.records.length
   }
 
   /**
-   * Deletes all filtered records.
-   * @description Removes all records matching current conditions from original data.
+   * Delete filtered records
+   * @description Removes matches from original records.
    * @returns Number of records deleted
    */
   delete(): number {
-    const deletedCount: number = this.data.length
-    const itemsToDelete: Set<Record<string, unknown>> = new Set(this.data)
-    for (let i: number = this.originalData.length - 1; i >= 0; i--) {
-      if (itemsToDelete.has(this.originalData[i] as Record<string, unknown>)) {
-        this.originalData.splice(i, 1)
+    const deletedCount: number = this.records.length
+    const recordsToDelete: Set<Record<string, unknown>> = new Set(this.records)
+    for (let i: number = this.originalRecords.length - 1; i >= 0; i--) {
+      if (recordsToDelete.has(this.originalRecords[i] as Record<string, unknown>)) {
+        this.originalRecords.splice(i, 1)
       }
     }
-    this.data.length = 0
-    this.parent?.syncFromQueryBuilder(this.originalData)
+    this.records.length = 0
+    this.parentDb?.syncFromQueryBuilder(this.originalRecords)
     return deletedCount
   }
 
   /**
-   * Gets the first filtered record.
-   * @description Returns the first record matching current conditions or null if none found.
+   * Get first filtered record
+   * @description Returns first match, or null.
    * @returns First matching record or null
    */
   first(): Record<string, unknown> | null {
-    return this.data[0] ?? null
+    return this.records[0] ?? null
   }
 
   /**
-   * Gets all filtered records.
-   * @description Returns a copy of all records matching current conditions.
+   * Get filtered records
+   * @description Returns copy of matching records.
    * @returns Array of matching records
    */
   get(): Record<string, unknown>[] {
-    return [...this.data]
+    return [...this.records]
   }
 
   /**
-   * Updates all filtered records.
-   * @description Applies the provided data to all records matching current conditions.
+   * Update filtered records
+   * @description Applies fields to all matches.
    * @param data - Object containing fields to update
    */
   update(data: Record<string, unknown>): void {
-    this.data.forEach((item: Record<string, unknown>) => {
+    this.records.forEach((item: Record<string, unknown>) => {
       Object.keys(data).forEach((key: string) => {
         if (key.includes('.')) {
           this.setNestedValue(item, key, data[key])
@@ -89,24 +90,24 @@ export class QueryBuilder {
         }
       })
     })
-    this.parent?.syncFromQueryBuilder(this.originalData)
+    this.parentDb?.syncFromQueryBuilder(this.originalRecords)
   }
 
   /**
-   * Adds a filter condition to the query.
-   * @description Filters records based on string condition or function predicate.
+   * Add filter condition
+   * @description Filters by string or predicate.
    * @param condition - Query string or function to filter records
    * @returns QueryBuilder instance for chaining
    */
   where(condition: string | ((item: Record<string, unknown>) => boolean)): QueryBuilder {
     if (typeof condition === 'function') {
-      this.data = this.data.filter(condition)
+      this.records = this.records.filter(condition)
     } else {
-      const parsed: JsonaryCondition | null = this.parseCondition(condition)
-      if (parsed) {
-        this.conditions.push(parsed)
-        this.data = this.data.filter((item: Record<string, unknown>) =>
-          this.evaluateCondition(item, parsed)
+      const parsedCondition: Types.JsonaryCondition | null = this.parseCondition(condition)
+      if (parsedCondition) {
+        this.conditions.push(parsedCondition)
+        this.records = this.records.filter((item: Record<string, unknown>) =>
+          this.evaluateCondition(item, parsedCondition)
         )
       }
     }
@@ -114,17 +115,20 @@ export class QueryBuilder {
   }
 
   /**
-   * Evaluates a condition against a data item.
-   * @description Checks if an item matches the specified condition using appropriate operator.
+   * Evaluate condition against item
+   * @description Checks item match for given operator.
    * @param item - Data item to evaluate
    * @param condition - Condition to check against
    * @returns True if condition matches, false otherwise
    */
-  private evaluateCondition(item: Record<string, unknown>, condition: JsonaryCondition): boolean {
-    const { operator, value }: JsonaryCondition = condition
+  private evaluateCondition(
+    item: Record<string, unknown>,
+    condition: Types.JsonaryCondition
+  ): boolean {
+    const { operator, value }: Types.JsonaryCondition = condition
     const fieldValue: unknown = this.getNestedValue(item, condition.field)
-    const op: JsonaryCondition['operator'] = operator
-    switch (op) {
+    const operatorToken: Types.JsonaryCondition['operator'] = operator
+    switch (operatorToken) {
       case queryOperators.eq:
         return fieldValue === value
       case queryOperators.neq:
@@ -157,8 +161,8 @@ export class QueryBuilder {
   }
 
   /**
-   * Gets a nested value from an object using dot notation.
-   * @description Traverses object properties using dot-separated path.
+   * Get nested value by path
+   * @description Traverses dot-separated property path.
    * @param obj - Object to traverse
    * @param path - Dot-separated path to the property
    * @returns Value at the specified path or undefined
@@ -167,53 +171,53 @@ export class QueryBuilder {
     if (!path.includes('.')) {
       return obj[path]
     }
-    let current: unknown = obj
+    let currentValue: unknown = obj
     const keys: string[] = path.split('.')
     for (let i: number = 0; i < keys.length; i++) {
-      if (current === null || current === undefined || typeof current !== 'object') {
+      if (currentValue === null || currentValue === undefined || typeof currentValue !== 'object') {
         return undefined
       }
       const key: string | undefined = keys[i]
       if (key === undefined) {
         return undefined
       }
-      current = (current as Record<string, unknown>)[key]
+      currentValue = (currentValue as Record<string, unknown>)[key]
     }
-    return current
+    return currentValue
   }
 
   /**
-   * Parses a string condition into structured format.
-   * @description Converts string-based conditions into JsonaryCondition objects.
+   * Parse condition string
+   * @description Converts string to condition object.
    * @param condition - String condition to parse
    * @returns Parsed condition object or null if invalid
    */
-  private parseCondition(condition: string): JsonaryCondition | null {
-    if (QueryBuilder.conditionRecent.has(condition)) {
-      return QueryBuilder.conditionRecent.get(condition) ?? null
+  private parseCondition(condition: string): Types.JsonaryCondition | null {
+    if (QueryBuilder.recentConditionCache.has(condition)) {
+      return QueryBuilder.recentConditionCache.get(condition) ?? null
     }
     const operators: string[] = getOperatorsSorted()
-    for (const op of operators) {
-      const index: number = condition.indexOf(op)
+    for (const operatorToken of operators) {
+      const index: number = condition.indexOf(operatorToken)
       if (index !== -1) {
-        const value: string = condition.substring(index + op.length).trim()
-        const parsedValue: unknown = this.parseSpecialValue(this.stripQuotes(value))
-        const result: JsonaryCondition = {
+        const rawValue: string = condition.substring(index + operatorToken.length).trim()
+        const parsedValue: unknown = this.parseSpecialValue(this.stripQuotes(rawValue))
+        const result: Types.JsonaryCondition = {
           field: condition.substring(0, index).trim(),
-          operator: op as JsonaryCondition['operator'],
+          operator: operatorToken as Types.JsonaryCondition['operator'],
           value: parsedValue
         }
-        QueryBuilder.conditionRecent.set(condition, result)
+        QueryBuilder.recentConditionCache.set(condition, result)
         return result
       }
     }
-    QueryBuilder.conditionRecent.set(condition, null)
+    QueryBuilder.recentConditionCache.set(condition, null)
     return null
   }
 
   /**
-   * Parses special string values to their appropriate types.
-   * @description Converts string representations of special values to their actual types.
+   * Parse special value tokens
+   * @description Converts tokens to typed values.
    * @param value - Value to parse
    * @returns Parsed value in appropriate type
    */
@@ -236,34 +240,38 @@ export class QueryBuilder {
   }
 
   /**
-   * Sets a nested value in an object using dot notation.
-   * @description Creates nested objects as needed and sets the final value.
+   * Set nested value by path
+   * @description Creates objects and sets final value.
    * @param obj - Object to modify
    * @param path - Dot-separated path to the property
    * @param value - Value to set
    */
   private setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
     const keys: string[] = path.split('.')
-    let current: Record<string, unknown> = obj
+    let currentObject: Record<string, unknown> = obj
     for (let i: number = 0; i < keys.length - 1; i++) {
       const key: string | undefined = keys[i]
       if (key === undefined) {
         continue
       }
-      if (!(key in current) || typeof current[key] !== 'object' || current[key] === null) {
-        current[key] = {}
+      if (
+        !(key in currentObject) ||
+        typeof currentObject[key] !== 'object' ||
+        currentObject[key] === null
+      ) {
+        currentObject[key] = {}
       }
-      current = current[key] as Record<string, unknown>
+      currentObject = currentObject[key] as Record<string, unknown>
     }
     const lastKey: string | undefined = keys[keys.length - 1]
     if (lastKey !== undefined) {
-      current[lastKey] = value
+      currentObject[lastKey] = value
     }
   }
 
   /**
-   * Strips quotes from string values.
-   * @description Removes surrounding single or double quotes from string values.
+   * Strip surrounding quotes
+   * @description Removes wrapping single or double quotes.
    * @param value - String value to process
    * @returns Processed value with quotes removed if applicable
    */

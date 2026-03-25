@@ -28,3 +28,6 @@ jobs:
 
       - name: Type check
         run: deno check src/index.ts
+
+      - name: Test
+        run: deno test --allow-read --allow-write --allow-env
