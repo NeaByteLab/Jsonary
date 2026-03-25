@@ -1,10 +1,10 @@
-import type { QueryOperatorsType } from '@interfaces/index.ts'
+import type * as Types from '@app/Types.ts'
 
 /**
- * Query operator constants.
+ * Query operator constants
  * @description Centralized definitions for all supported query operators.
  */
-export const queryOperators: QueryOperatorsType = {
+export const queryOperators: Types.QueryOperatorsType = {
   eq: '=',
   neq: '!=',
   gt: '>',
@@ -17,8 +17,8 @@ export const queryOperators: QueryOperatorsType = {
 } as const
 
 /**
- * Gets all operator values sorted by length (longest first).
- * @description Used for parsing conditions with correct operator precedence.
+ * Get sorted operator values
+ * @description Sorts operators by length, longest first.
  * @returns Array of operator values sorted by length
  */
 export function getOperatorsSorted(): string[] {

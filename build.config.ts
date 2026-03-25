@@ -14,8 +14,7 @@ export default defineBuildConfig({
   clean: true,
   /** Path alias for imports (e.g. @root → src). */
   alias: {
-    '@root': resolve(__dirname, 'src'),
-    '@interfaces': resolve(__dirname, 'src/interfaces')
+    '@app': resolve(__dirname, 'src')
   },
   /** Rollup options: emit CJS and inline runtime deps. */
   rollup: {

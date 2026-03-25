@@ -1,6 +1,6 @@
 /**
- * Query condition structure for filtering data.
- * @description Defines the structure for parsing and evaluating query conditions.
+ * Query condition structure
+ * @description Parsed condition for record filtering.
  */
 export interface JsonaryCondition {
   /** Field name to evaluate */
@@ -12,8 +12,8 @@ export interface JsonaryCondition {
 }
 
 /**
- * Configuration options for Jsonary instance.
- * @description Defines the file path where JSON data will be stored and managed.
+ * Jsonary configuration options
+ * @description Config for Jsonary file storage.
  */
 export interface JsonaryOptions {
   /** File path to the JSON data file */
@@ -21,27 +21,27 @@ export interface JsonaryOptions {
 }
 
 /**
- * Parent interface for synchronization with QueryBuilder.
- * @description Defines the contract for parent instances to receive updates from QueryBuilder operations.
+ * Parent interface for QueryBuilder sync
+ * @description Contract for QueryBuilder sync updates.
  */
 export interface JsonaryParent {
   /**
-   * Synchronizes updated data from QueryBuilder.
-   * @description Updates the parent instance with modified data after query operations.
+   * Synchronizes data from QueryBuilder
+   * @description Applies QueryBuilder changes to parent.
    * @param updatedData - The updated data array to sync
    */
   syncFromQueryBuilder(updatedData: Record<string, unknown>[]): void
 }
 
 /**
- * Operator type for query conditions.
- * @description Union type of all valid query operators.
+ * Query operator type
+ * @description Union of valid operator tokens.
  */
 export type QueryOperator = QueryOperatorsType[keyof QueryOperatorsType]
 
 /**
- * Available query operators for filtering data.
- * @description Defines all supported comparison operators used in query conditions.
+ * Available query operators
+ * @description Operator tokens supported in conditions.
  */
 export type QueryOperatorsType = {
   /** Equality operator for exact matches */
