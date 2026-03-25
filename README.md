@@ -68,6 +68,23 @@ const firstJohn = db.where('name = John').first()
 npm run build
 ```
 
+## Testing
+
+**Type check** — format, lint, and type-check:
+
+```bash
+deno task check
+```
+
+**Unit tests** — format/lint tests and run all tests:
+
+```bash
+deno task test
+```
+
+- Tests live under `tests/` (public API tests in `tests/jsonary.test.ts`).
+- The test task uses `--allow-read`, `--allow-write`, and `--allow-env`.
+
 ## License
 
 This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for details.
