@@ -1,39 +1,29 @@
-/**
- * Build configuration for the Ollama Native project
- * @fileoverview Configuration for unbuild bundler with TypeScript support
- */
-
 import { defineBuildConfig } from 'unbuild'
-import { resolve } from 'path'
+import { resolve } from 'node:path'
 
 /**
- * Build configuration object
- * @description Defines the build settings for bundling TypeScript source files
- * @returns {import('unbuild').BuildConfig} The build configuration
+ * Unbuild config for package bundle.
+ * @description Entry, alias, CJS/ESM, declarations, no sourcemaps.
  */
 export default defineBuildConfig({
-  /** @type {string[]} Entry points for the build process */
+  /** Entry module path(s) for build. */
   entries: ['src/index'],
-  /** @type {boolean} Whether to generate TypeScript declaration files */
+  /** Emit TypeScript declaration files. */
   declaration: true,
-  /** @type {boolean} Whether to clean the output directory before building */
+  /** Remove output directory before build. */
   clean: true,
-  /**
-   * Path aliases for module resolution
-   * @type {Record<string, string>} Map of alias names to their resolved paths
-   */
+  /** Path alias for imports (e.g. @root → src). */
   alias: {
-    /** @type {string} Alias for root directory */
     '@root': resolve(__dirname, 'src'),
-    /** @type {string} Alias for interfaces directory */
     '@interfaces': resolve(__dirname, 'src/interfaces')
   },
+  /** Rollup options: emit CJS and inline runtime deps. */
   rollup: {
     emitCJS: true,
     inlineDependencies: true
   },
-  /** @type {boolean} Whether to generate source maps */
+  /** Disable source map generation. */
   sourcemap: false,
-  /** @type {boolean} Whether to fail the build on warnings */
+  /** Do not fail build on Rollup warnings. */
   failOnWarn: false
 })

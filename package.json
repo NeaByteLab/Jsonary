@@ -1,7 +1,7 @@
 {
   "name": "@neabyte/jsonary",
   "version": "1.0.1",
-  "description": "A lightweight TypeScript library for file-based JSON database operations with querying capabilities.",
+  "description": "File-based JSON database for TypeScript, with a simple query builder",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -14,13 +14,9 @@
     }
   },
   "scripts": {
-    "build": "npm run type-check && unbuild --minify",
-    "lint": "eslint 'src/**/*.ts'",
-    "lint:fix": "eslint 'src/**/*.ts' --fix",
-    "format": "prettier --write 'src/**/*.ts'",
-    "clean": "rm -rf dist && rm -rf .tsbuildinfo",
-    "prepublishOnly": "npm run clean && npm run build",
-    "type-check": "tsc --noEmit"
+    "build": "unbuild --minify",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "rm -rf dist && npm run build"
   },
   "keywords": [
     "crud",
@@ -48,6 +44,10 @@
     "typescript",
     "zero-dependency"
   ],
+  "dependencies": {},
+  "devDependencies": {
+    "unbuild": "^3.6.1"
+  },
   "author": {
     "name": "NeaByteLab",
     "email": "me@neabyte.com",
@@ -62,20 +62,6 @@
     "url": "https://github.com/NeaByteLab/Jsonary/issues"
   },
   "homepage": "https://github.com/NeaByteLab/Jsonary#readme",
-  "devDependencies": {
-    "@eslint/js": "^9.38.0",
-    "@types/node": "^24.9.1",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
-    "eslint": "^9.38.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-security": "^3.0.1",
-    "eslint-plugin-sonarjs": "^3.0.5",
-    "prettier": "^3.6.2",
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
-    "unbuild": "^3.6.1"
-  },
   "engines": {
     "node": ">=22.0.0"
   },
