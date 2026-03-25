@@ -6,14 +6,15 @@ on:
       - main
 
 jobs:
-  publish:
+  deno-publish:
+    name: Deno (JSR)
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.5.4
@@ -21,5 +22,5 @@ jobs:
       - name: Check package
         run: deno check src/index.ts
 
-      - name: Publish package
+      - name: Publish to JSR
         run: deno publish --allow-dirty

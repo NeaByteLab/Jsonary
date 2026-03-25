@@ -1,5 +1,5 @@
 import type { JsonaryCondition, JsonaryParent } from '@interfaces/index.ts'
-import { queryOperators, getOperatorsSorted } from '@root/Constant.ts'
+import { getOperatorsSorted, queryOperators } from '@root/Constant.ts'
 
 /**
  * Query builder for filtering and manipulating JSON data.
@@ -271,7 +271,7 @@ export class QueryBuilder {
     if (
       typeof value === 'string' &&
       ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith('\'') && value.endsWith('\'')))
+        (value.startsWith("'") && value.endsWith("'")))
     ) {
       return value.slice(1, -1)
     }
