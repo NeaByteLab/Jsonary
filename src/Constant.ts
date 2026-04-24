@@ -1,26 +1,29 @@
-import type * as Types from '@app/Types.ts'
+import type * as Types from '@app/types.ts'
 
 /**
- * Query operator constants
- * @description Centralized definitions for all supported query operators.
+ * Query operators utility.
+ * @description Static constants and methods for query operators.
  */
-export const queryOperators: Types.QueryOperatorsType = {
-  eq: '=',
-  neq: '!=',
-  gt: '>',
-  lt: '<',
-  gte: '>=',
-  lte: '<=',
-  contains: 'contains',
-  startsWith: 'startsWith',
-  endsWith: 'endsWith'
-} as const
+export default class Operators {
+  /** Query operator constants */
+  static readonly queryOperators: Types.QueryOperatorsType = {
+    eq: '=',
+    neq: '!=',
+    gt: '>',
+    lt: '<',
+    gte: '>=',
+    lte: '<=',
+    contains: 'contains',
+    startsWith: 'startsWith',
+    endsWith: 'endsWith'
+  } as const
 
-/**
- * Get sorted operator values
- * @description Sorts operators by length, longest first.
- * @returns Array of operator values sorted by length
- */
-export function getOperatorsSorted(): string[] {
-  return Object.values(queryOperators).sort((a: string, b: string) => b.length - a.length)
+  /**
+   * Get sorted operator values.
+   * @description Sorts operators by length, longest first.
+   * @returns Array of operator values sorted by length
+   */
+  static getSorted(): string[] {
+    return Object.values(this.queryOperators).sort((a: string, b: string) => b.length - a.length)
+  }
 }
