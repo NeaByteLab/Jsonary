@@ -1,46 +1,6 @@
 import { assert, assertEquals } from '@std/assert'
+import { assertIndex, assertRecord, withTempDb, withTempDbRoot } from '@tests/utils.ts'
 import Jsonary from '@neabyte/jsonary'
-
-function assertRecord(value: unknown, message: string): Record<string, unknown> {
-  assert(typeof value === 'object' && value !== null, message)
-  return value as Record<string, unknown>
-}
-
-function assertIndex<T>(value: T | undefined, message: string): T {
-  assert(value !== undefined, message)
-  return value
-}
-
-async function withTempDb<T>(
-  initialData: Record<string, unknown>[],
-  fn: (db: Jsonary, filePath: string) => Promise<T> | T
-): Promise<T> {
-  const dir = await Deno.makeTempDir()
-  const filePath = `${dir}/data.json`
-  await Deno.writeTextFile(filePath, JSON.stringify(initialData, null, 2))
-
-  try {
-    const db = new Jsonary({ path: filePath })
-    return await fn(db, filePath)
-  } finally {
-    await Deno.remove(dir, { recursive: true })
-  }
-}
-
-async function withTempDbRoot<T>(
-  root: unknown,
-  fn: (db: Jsonary, filePath: string) => Promise<T> | T
-): Promise<T> {
-  const dir = await Deno.makeTempDir()
-  const filePath = `${dir}/data.json`
-  await Deno.writeTextFile(filePath, JSON.stringify(root, null, 2))
-  try {
-    const db = new Jsonary({ path: filePath })
-    return await fn(db, filePath)
-  } finally {
-    await Deno.remove(dir, { recursive: true })
-  }
-}
 
 Deno.test('Jsonary - accepts non-array root JSON (wraps into single record list)', async () => {
   await withTempDbRoot({ name: 'Root' }, (db) => {
@@ -63,7 +23,6 @@ Deno.test('Jsonary - deleteWhere supports string and function conditions', async
       assertEquals(db.get().length, 1)
       const remaining = assertIndex(db.get()[0], 'Expected one remaining record')
       assertEquals(remaining['name'], 'C')
-
       const deletedFn = db.deleteWhere((item) => {
         const age = item['age']
         return typeof age === 'number' && age < 25
@@ -90,13 +49,11 @@ Deno.test('Jsonary - invalid string condition does not filter results', async ()
 Deno.test('Jsonary - insert and get persist to file', async () => {
   await withTempDb([], async (db, filePath) => {
     db.insert({ name: 'John', age: 30 })
-
     const all = db.get()
     assertEquals(all.length, 1)
     const first = assertIndex(all[0], 'Expected at least one record')
     assertEquals(first['name'], 'John')
     assertEquals(first['age'], 30)
-
     const parsed = JSON.parse(await Deno.readTextFile(filePath)) as unknown
     assert(Array.isArray(parsed), 'Expected JSON array in file')
     const firstInFile = assertIndex((parsed as Record<string, unknown>[])[0], 'File array empty')
@@ -110,12 +67,9 @@ Deno.test('Jsonary - insertMany persists and clear wipes the file', async () => 
       { name: 'Jane', age: 25 },
       { name: 'Bob', age: 35 }
     ])
-
     assertEquals(db.get().length, 2)
-
     db.clear()
     assertEquals(db.get().length, 0)
-
     const parsed = JSON.parse(await Deno.readTextFile(filePath)) as unknown
     assert(Array.isArray(parsed), 'Expected JSON array in file')
     assertEquals((parsed as unknown[]).length, 0)
@@ -131,21 +85,16 @@ Deno.test('Jsonary - query operators (quoted values and contains/starts/ends)', 
     ],
     (db) => {
       assertEquals(db.where('name = "John"').first()?.['age'], 31)
-
       const contains = db.where('name contains "ohn"').get()
       assertEquals(contains.length, 2)
-
       const starts = db.where('name startsWith "John"').get()
       assertEquals(starts.length, 2)
-
       const ends = db.where('name endsWith "lice"').get()
       assertEquals(ends.length, 1)
       const endRecord = assertIndex(ends[0], 'Expected one endsWith match')
       assertEquals(endRecord['name'], 'Alice')
-
       const gte = db.where('age >= 20').count()
       assertEquals(gte, 2)
-
       const lte = db.where('age <= 20').count()
       assertEquals(lte, 2)
     }
@@ -174,10 +123,8 @@ Deno.test('Jsonary - query supports null and undefined values', async () => {
   await withTempDb([{ name: 'A', value: null }, { name: 'B' }], (db) => {
     assertEquals(db.where('value = null').count(), 1)
     assertEquals(db.where('value = null').first()?.['name'], 'A')
-
     assertEquals(db.where('value = undefined').count(), 1)
     assertEquals(db.where('value = undefined').first()?.['name'], 'B')
-
     assertEquals(db.where('value != undefined').count(), 1)
   })
 })
@@ -226,7 +173,6 @@ Deno.test('Jsonary - updateWhere supports function predicate', async () => {
         },
         { status: 'minor' }
       )
-
       assertEquals(updated, 2)
       assertEquals(db.where('status = minor').count(), 2)
       assertEquals(
@@ -246,9 +192,7 @@ Deno.test('Jsonary - updateWhere supports nested dot-path keys', async () => {
       'profile.active': true,
       'profile.verified': true
     })
-
     assertEquals(updated, 1)
-
     const admin = db.where('profile.active = true').first()
     assert(admin !== null, 'Expected a matching admin record')
     const profile = assertRecord(admin?.['profile'], 'Expected profile object')
@@ -267,19 +211,15 @@ Deno.test('Jsonary - where chaining update/count/first/delete', async () => {
     ],
     (db) => {
       db.where('age >= 25').where('profile.role = admin').update({ 'profile.verified': true })
-
       const verifiedAdmins = db.where('profile.verified = true').get()
       assertEquals(verifiedAdmins.length, 2)
       const verifiedAdmin = assertIndex(verifiedAdmins[0], 'Expected one verified admin record')
       assertEquals(verifiedAdmin['name'], 'John')
-
       const adminCount = db.where('profile.role = admin').count()
       assertEquals(adminCount, 2)
-
       const firstAdmin = db.where('profile.role = admin').first()
       assert(firstAdmin !== null, 'Expected a first admin record')
       assertEquals(firstAdmin?.['name'], 'John')
-
       const deleted = db.where('profile.active = false').delete()
       assertEquals(deleted, 1)
       assertEquals(db.where('profile.active = false').count(), 0)
@@ -296,13 +236,12 @@ Deno.test('Jsonary - where supports function predicate chaining', async () => {
     ],
     (db) => {
       const result = db
-        .where((item) => {
+        .where((item: Record<string, unknown>) => {
           const age = item['age']
           return typeof age === 'number' && age >= 20
         })
         .where('name contains "ohn"')
         .get()
-
       assertEquals(result.length, 2)
       assertEquals(
         result.some((item: Record<string, unknown>) => item['name'] === 'Alice'),
