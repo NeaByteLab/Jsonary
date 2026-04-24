@@ -58,7 +58,7 @@ const adults = db.where('age >= 18').get()
 const firstJohn = db.where('name = John').first()
 ```
 
-- [USAGE.md](USAGE.md) for more examples and query operator details.
+See [USAGE.md](USAGE.md) for more examples and query operator details.
 
 ## Build
 
