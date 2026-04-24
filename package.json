@@ -1,6 +1,6 @@
 {
   "name": "@neabyte/jsonary",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "File-based JSON database for TypeScript, with a simple query builder",
   "type": "module",
   "main": "dist/index.cjs",
